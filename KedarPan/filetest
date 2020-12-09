@@ -1,1 +1,71 @@
 this is another test for merge.
+
+
+CREATE TABLE hie_src_docu
+( 
+	hie_src_docu_uid     serial  NOT NULL ,
+	hie_docu_uid         integer  NOT NULL ,
+	fldr_num             integer  NOT NULL ,
+	case_num             integer  NOT NULL ,
+	hitech_case_uid      integer  NOT NULL ,
+	docu_formt_oid       varchar(64)  NULL ,
+	docu_formt_cd        varchar(64)  NULL ,
+	docu_mime_typ_nm     varchar(128)  NOT NULL ,
+	docu_cmprssd_size_num integer  NOT NULL ,
+	docu_hash_id         varchar(32)  NOT NULL ,
+	insrt_ts             date  NOT NULL ,
+	lu_ts                date  NOT NULL ,
+	docu_ctnt_fl         bytea  NOT NULL 
+);
+
+create table test2 (
+did serial not null constraint firstkey primary key,
+code char(5) null,
+titile varchar(10) not null
+);
+
+
+
+ALTER TABLE hie_src_docu
+	ADD CONSTRAINT hie_src_docu_pk PRIMARY KEY (hie_src_docu_uid);
+
+CREATE UNIQUE INDEX hie_src_docu_1_idx ON hie_src_docu
+( 
+	hie_docu_uid ASC
+);
+
+CREATE UNIQUE INDEX hie_src_docu_2_idx ON hie_src_docu
+( 
+	hie_docu_uid ASC,
+	hitech_case_uid ASC
+);
+
+CREATE INDEX hie_src_docu_3_idx ON hie_src_docu
+( 
+	hitech_case_uid ASC
+);
+
+create function hit.test2_stamp() returns trigger as $test2_stamp$
+begin
+NEW.last_update = current_timestamp;
+return new;
+end;
+$test2_stamp$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER test2_stamp BEFORE INSERT or UPDATE ON hit.test2
+    FOR EACH ROW EXECUTE PROCEDURE hit.test2_stamp();
+
+CREATE SEQUENCE hit.BATCH_JOB_SEQ
+                    START 1
+                    INCREMENT 1
+                    MINVALUE 1
+                    MAXVALUE 9223372036854775807
+                    NO CYCLE
+                    CACHE 20
+                    ;
+
+ALTER TABLE metadata.user_pub_key
+	ADD CONSTRAINT pub_key_typ_cd_ref_user_pub_key_fk FOREIGN KEY (pub_key_typ_cd) REFERENCES metadata.pub_key_typ_cd_ref(pub_key_typ_cd)
+		ON UPDATE SET NULL
+		ON DELETE SET NULL;
